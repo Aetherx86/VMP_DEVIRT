@@ -1,0 +1,87 @@
+{
+  "linear_mba": [
+    {
+      "name": "classical_add",
+      "simplified": "x + y",
+      "expected": "x + y",
+      "proven_equivalent": true,
+      "latency_ms": 18.99
+    },
+    {
+      "name": "boolean_xor",
+      "simplified": "x ^ y",
+      "expected": "x ^ y",
+      "proven_equivalent": true,
+      "latency_ms": 10.51
+    },
+    {
+      "name": "or_xor_add",
+      "simplified": "x + y",
+      "expected": "x + y",
+      "proven_equivalent": true,
+      "latency_ms": 24.56
+    },
+    {
+      "name": "subtraction_mba",
+      "simplified": "x - y",
+      "expected": "x - y",
+      "proven_equivalent": true,
+      "latency_ms": 20.56
+    }
+  ],
+  "nonlinear_mba": {
+    "synthesized_expression": "((x ^ 92) + y)",
+    "proven_equivalent": true,
+    "latency_ms": 40.86
+  },
+  "dataset_devirtualization": [
+    {
+      "function_name": "arith_div",
+      "handlers_discovered": 10,
+      "bytecode_size": 52,
+      "recovered_cfg_nodes": 28,
+      "recovered_cfg_edges": 27,
+      "ssa_statements_count": 14,
+      "ssa_statements": [
+        "%v1 = formal ['arg_167']",
+        "%v2 = load *%v1",
+        "%v3 = local ['local_offset_147']",
+        "store %v3 -> *%v2",
+        "%v4 = local ['local_offset_147']",
+        "store %v4 -> *%dest",
+        "%v5 = sub_call()",
+        "%v6 = local ['local_offset_147']",
+        "%v7 = load *%v6",
+        "%v8 = local ['local_offset_147']"
+      ],
+      "latency_ms": 284.44814682006836
+    },
+    {
+      "function_name": "nextline",
+      "handlers_discovered": 22,
+      "bytecode_size": 196,
+      "recovered_cfg_nodes": 132,
+      "recovered_cfg_edges": 131,
+      "ssa_statements_count": 36,
+      "ssa_statements": [
+        "%v11 = formal ['arg_213']",
+        "%v12 = load *%v11",
+        "%v13 = formal ['arg_213']",
+        "%v14 = load *%v13",
+        "%v15 = load *%v14",
+        "%v16 = load *%v15",
+        "%v17 = local ['local_offset_42']",
+        "%v18 = formal ['arg_213']",
+        "%v19 = load *%v18",
+        "%v20 = formal ['arg_213']"
+      ],
+      "latency_ms": 281.15200996398926
+    }
+  ],
+  "apr_speedup": {
+    "queries": 500,
+    "smt_latency_ms": 104.77,
+    "apr_latency_ms": 32.23,
+    "speedup_factor": 3.3
+  }
+}

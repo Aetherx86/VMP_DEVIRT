@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-10-23T18:25:46Z",
+  "evaluations": [
+    {
+      "test": "MBA_SMT_Equivalence",
+      "result": "UNSAT (Provably Equivalent)",
+      "verified_states": 65536,
+      "elapsed_ms": 32.89,
+      "success": true
+    },
+    {
+      "test": "Real_VMP_Trace_Slicing",
+      "raw_trace_lines": 54832,
+      "executed_instructions": 25085,
+      "vmp_handler_instructions": 25071,
+      "reduced_kernel_instructions": 14,
+      "reduction_percentage": 99.94,
+      "elapsed_ms": 10.67
+    },
+    {
+      "test": "Pushan_vs_DSE_Hash",
+      "dse_status": "unknown",
+      "dse_time_s": 2.23,
+      "pushan_status": "100% Branches Recovered",
+      "pushan_time_ms": 4.44,
+      "speedup_factor": 501.0
+    }
+  ]
+}

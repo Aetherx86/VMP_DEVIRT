@@ -1,0 +1,60 @@
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Heavy External Tools & Proprietary Suites (Kept locally only)
+VMProtect 3.5.1/
+deobfuscation/pin/
+triton_script/pin/
+pin_tool/
+pdfs/
+naive_rev/
+
+# External Datasets & Binary Dumps
+diffing_obfuscation_dataset/
+*.BinExport
+*.Quokka
+*.zip
+*.tar.gz
+
+# Build artifacts and compiled binaries
+build/
+bin/
+obj-*/
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.a
+*.lib
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+venv/
+.env/
+
+# Execution traces, logs, and dumps
+*.log
+*.trace
+*.trace.*
+devirt.vmp.trace
+trace_vmp

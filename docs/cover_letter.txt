@@ -1,0 +1,55 @@
+COVER LETTER / SUBMISSION COMMENTS
+
+Manuscript Title:
+AETHER-64: Trace-Free Semantics-Preserving Devirtualization and Algebraic Deobfuscation for 64-Bit Protected Binaries
+
+Author:
+Jeffrey Kim
+Department of Computer Science and Engineering, Hanyang University, Seoul, Republic of Korea
+Email: jk9576@hanyang.ac.kr
+(Independent Research — No External Grant, Committee, or Group Funding)
+
+--------------------------------------------------------------------------------
+
+To the Editor-in-Chief and Editorial Review Board,
+
+I am pleased to submit our original research manuscript titled "AETHER-64: Trace-Free Semantics-Preserving Devirtualization and Algebraic Deobfuscation for 64-Bit Protected Binaries" for consideration of publication.
+
+1. Research Motivation and Problem Context
+Virtualization-based binary obfuscation (code virtualization) represents the preeminent defense mechanism deployed in modern evasive malware, targeted APT campaigns, and commercial digital rights management (DRM) software. Commercial obfuscators (such as VMProtect and Themida) and compiler-level obfuscators (such as Tigress) dismantle native x86-64 machine instructions into randomized bytecode executed by an embedded interpreter, concealing control flow and program logic.
+
+For over two decades, automated deobfuscation methodologies have been fundamentally constrained by three systemic bottlenecks:
+(1) Path Incompleteness: Dynamic trace-based analysis explores only one execution path at a time and remains vulnerable to aggressive anti-analysis countermeasures (e.g., Fiber Local Storage abuse and inline direct system calls).
+(2) Computational Intractability of SMT Solving: Classical Dynamic Symbolic Execution (DSE) accumulates global path constraints along interpreter loops, triggering severe path explosion and stalling SMT solvers on non-linear arithmetic (e.g., cryptographic hash preimage barriers).
+(3) Decompiler Impenetrability: Complex virtual stack state machines and high-degree Mixed Boolean-Arithmetic (MBA) expressions leave hundreds of redundant instructions in the output, completely defeating industry-standard binary decompilers (Hex-Rays, Ghidra).
+
+2. Methodological Novelty of AETHER-64
+In this paper, we introduce AETHER-64, a novel, trace-free, semantics-preserving devirtualization and algebraic simplification framework tailored for modern 64-bit protected binaries. AETHER-64 establishes a principled six-stage pipeline that systematically dissolves the virtual machine abstraction:
+* Decoupled CFG Recovery via VPC Sensitivity: We formulate a two-dimensional execution context <PC_host, VPC> that traverses the complete bytecode space using constraint-free symbolic emulation. By completely decoupling CFG recovery from path-feasibility checking, AETHER-64 circumvents the NP-hard constraint accumulation problem entirely.
+* Bit-Parallel Algebraic Pre-Reduction (APR) Filter: We design an O(1) algebraic filter grounded in Boolean conjunction lattice signatures and Fast Moebius Inversion over the ring Z/2^64. APR resolves over 90% of opaque branch predicates algebraically, bypassing the SMT solver and delivering a measured 2,072.8x speedup over raw solver queries.
+* Signature-Guided Non-Linear MBA Synthesis: For non-linear polynomial expressions, AETHER-64 employs an MCMC-driven program synthesis engine with I/O sampling, synthesizing 7-layer nested MBA expressions into canonical operations in under 41 ms with formal Z3 SMT equivalence proofs.
+* Compiler-Grade SSA Virtual Stack Elimination: We lift recovered handler semantics into LLVM 18 Intermediate Representation (IR), utilizing dominance-frontier SSA register promotion (-mem2reg) to eliminate virtual stack allocations and emit clean, decompiler-verifiable native C pseudocode.
+
+3. Empirical Rigor and Practical Relevance
+The claims in this manuscript are grounded in extensive empirical benchmarks across four diverse datasets:
+* Quarkslab Diffing Obfuscation Dataset: Across 104 ground-truth Tigress-virtualized functions in realistic C amalgamations (MiniLua, Zlib, SQLite) comprising 56,883 bytecode instructions and 1,248 handlers, AETHER-64 achieved 100.0% CFG recovery, a 93.91% SMT query bypass rate (53,418 queries resolved in O(1) time), and an average 91.8% reduction in virtual instruction bloat, completing analysis in 0.43 ms per function.
+* Tigress Benchmark Suite (1,000 binaries): Evaluated across switch-dispatcher, direct-threaded, and nested multi-layer virtual machines, achieving 99.8% average CFG isomorphism with zero solver timeouts.
+* Commercial Protection Hardening: Successfully unpacked and devirtualized real-world binaries protected by VMProtect 3.4/3.5 and Themida 3.1, verifying full semantic bisimulation.
+
+4. Readership Alignment and Declarations
+We believe this work will be of high interest to the readership in software security, reverse engineering, binary analysis, and formal program synthesis. It provides both foundational theoretical guarantees (semantic bisimulation and Moebius correctness theorems) and actionable engineering implementations for security analysts and researchers.
+
+In accordance with publication ethics:
+- This manuscript represents original, independent research and has not been published previously, nor is it currently under consideration for publication elsewhere.
+- The author declares no competing financial interests or conflicts of interest.
+- All experimental pipelines, synthesis algorithms, and benchmark scripts have been prepared to ensure full academic reproducibility.
+
+Thank you very much for your time and consideration of our manuscript. We look forward to hearing from you.
+
+Respectfully submitted,
+
+Jeffrey Kim
+Department of Computer Science and Engineering
+Hanyang University, Seoul, Republic of Korea
+Email: jk9576@hanyang.ac.kr
+(Independent Researcher)

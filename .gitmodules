@@ -1,3 +1,30 @@
 [submodule "CIA_toolchain"]
 	path = CIA_toolchain
 	url = https://github.com/chosen-instruction-attack/CIA-toolchain.git
+[submodule "CIA-dataset"]
+	path = CIA-dataset
+	url = https://github.com/chosen-instruction-attack/CIA-dataset.git
+[submodule "CIA-toolchain"]
+	path = CIA-toolchain
+	url = https://github.com/chosen-instruction-attack/CIA-toolchain.git
+[submodule "Dna"]
+	path = Dna
+	url = https://github.com/JonathanSalwan/Dna.git
+[submodule "ProMBA"]
+	path = ProMBA
+	url = https://github.com/ColasL/ProMBA.git
+[submodule "Triton"]
+	path = Triton
+	url = https://github.com/JonathanSalwan/Triton.git
+[submodule "VMAttack"]
+	path = VMAttack
+	url = https://github.com/anatolikalysch/VMAttack.git
+[submodule "llvm-msvc"]
+	path = llvm-msvc
+	url = https://github.com/llvm/llvm-project.git
+[submodule "ollvm-unflattener"]
+	path = ollvm-unflattener
+	url = https://github.com/cq674350529/deflat.git
+[submodule "syntia"]
+	path = syntia
+	url = https://github.com/RUB-SysSec/syntia.git
