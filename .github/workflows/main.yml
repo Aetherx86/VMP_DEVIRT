@@ -1,0 +1,66 @@
+name: AETHER-64 Full CI & Verification Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  cmake-benchmarks:
+    name: CMake C Benchmarks (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build C Benchmarks
+      run: cmake --build build --config Release
+
+    - name: Run C Tests (ctest)
+      working-directory: build
+      run: ctest --build-config Release --output-on-failure
+
+  python-engine:
+    name: Verify AETHER-64 Engine & Z3 SMT Provers
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install z3-solver capstone
+
+    - name: Run Generic Deobfuscator & MBA Synthesizer Tests
+      run: |
+        python3 tests/test_real_deobfuscator.py
+
+    - name: Run System Evaluation Harness
+      run: |
+        python3 tests/evaluate_deobfuscation.py
+
+  paper-build:
+    name: Build IEEE Academic Paper (Typst)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Typst
+      uses: typst-community/setup-typst@v3
+
+    - name: Compile PDF
+      run: |
+        typst compile docs/aether64_paper.typ docs/aether64_paper.pdf
