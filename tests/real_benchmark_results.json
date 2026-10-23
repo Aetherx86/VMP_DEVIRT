@@ -5,34 +5,34 @@
       "simplified": "x + y",
       "expected": "x + y",
       "proven_equivalent": true,
-      "latency_ms": 18.99
+      "latency_ms": 18.59
     },
     {
       "name": "boolean_xor",
       "simplified": "x ^ y",
       "expected": "x ^ y",
       "proven_equivalent": true,
-      "latency_ms": 10.51
+      "latency_ms": 10.57
     },
     {
       "name": "or_xor_add",
       "simplified": "x + y",
       "expected": "x + y",
       "proven_equivalent": true,
-      "latency_ms": 24.56
+      "latency_ms": 23.53
     },
     {
       "name": "subtraction_mba",
       "simplified": "x - y",
       "expected": "x - y",
       "proven_equivalent": true,
-      "latency_ms": 20.56
+      "latency_ms": 18.05
     }
   ],
   "nonlinear_mba": {
     "synthesized_expression": "((x ^ 92) + y)",
     "proven_equivalent": true,
-    "latency_ms": 40.86
+    "latency_ms": 40.0
   },
   "dataset_devirtualization": [
     {
@@ -54,7 +54,7 @@
         "%v7 = load *%v6",
         "%v8 = local ['local_offset_147']"
       ],
-      "latency_ms": 284.44814682006836
+      "latency_ms": 279.9208164215088
     },
     {
       "function_name": "nextline",
@@ -75,13 +75,13 @@
         "%v19 = load *%v18",
         "%v20 = formal ['arg_213']"
       ],
-      "latency_ms": 281.15200996398926
+      "latency_ms": 259.60493087768555
     }
   ],
   "apr_speedup": {
     "queries": 500,
-    "smt_latency_ms": 104.77,
-    "apr_latency_ms": 32.23,
+    "smt_latency_ms": 101.87,
+    "apr_latency_ms": 31.28,
     "speedup_factor": 3.3
   }
 }
