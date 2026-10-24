@@ -8,8 +8,8 @@
   "total_smt_queries": 3465,
   "apr_bypass_rate_percent": 93.91,
   "mean_instruction_reduction_percent": 91.8,
-  "total_analysis_time_sec": 0.04,
-  "mean_time_per_function_ms": 0.43,
+  "total_analysis_time_sec": 0.03,
+  "mean_time_per_function_ms": 0.33,
   "functions_detail": [
     {
       "name": "arith_div",
@@ -23,7 +23,7 @@
       "reduction_percent": 97.2,
       "apr_bypassed_queries": 48,
       "smt_queries": 4,
-      "latency_ms": 10.56
+      "latency_ms": 1.93
     },
     {
       "name": "luaG_traceexec",
@@ -37,7 +37,7 @@
       "reduction_percent": 97.2,
       "apr_bypassed_queries": 1882,
       "smt_queries": 121,
-      "latency_ms": 0.92
+      "latency_ms": 0.4
     },
     {
       "name": "os_date",
@@ -51,7 +51,7 @@
       "reduction_percent": 97.2,
       "apr_bypassed_queries": 1378,
       "smt_queries": 88,
-      "latency_ms": 0.35
+      "latency_ms": 0.33
     },
     {
       "name": "aux_lines",
@@ -79,7 +79,7 @@
       "reduction_percent": 97.2,
       "apr_bypassed_queries": 227,
       "smt_queries": 15,
-      "latency_ms": 0.34
+      "latency_ms": 0.31
     },
     {
       "name": "funcname",
@@ -107,7 +107,7 @@
       "reduction_percent": 97.2,
       "apr_bypassed_queries": 184,
       "smt_queries": 12,
-      "latency_ms": 0.33
+      "latency_ms": 0.32
     },
     {
       "name": "sweeptolive",
@@ -121,7 +121,7 @@
       "reduction_percent": 97.3,
       "apr_bypassed_queries": 110,
       "smt_queries": 8,
-      "latency_ms": 0.47
+      "latency_ms": 0.31
     },
     {
       "name": "loadConstants",
@@ -135,7 +135,7 @@
       "reduction_percent": 97.2,
       "apr_bypassed_queries": 1703,
       "smt_queries": 109,
-      "latency_ms": 0.42
+      "latency_ms": 0.31
     },
     {
       "name": "luaK_self",
@@ -149,7 +149,7 @@
       "reduction_percent": 97.2,
       "apr_bypassed_queries": 284,
       "smt_queries": 19,
-      "latency_ms": 0.38
+      "latency_ms": 0.32
     }
   ]
 }

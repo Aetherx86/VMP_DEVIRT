@@ -52,6 +52,10 @@ __pycache__/
 venv/
 .env/
 
+# Local Archives and Backups
+docs/Archive/
+docs/Archived/
+
 # Execution traces, logs, and dumps
 *.log
 *.trace

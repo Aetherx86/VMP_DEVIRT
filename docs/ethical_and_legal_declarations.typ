@@ -40,7 +40,7 @@
 #grid(
   columns: (auto, 1fr),
   row-gutter: 0.3cm,
-  [*Manuscript Title:*], [ AETHER-64: Trace-Free Semantics-Preserving Devirtualization and Algebraic Deobfuscation for 64-Bit Protected Binaries],
+  [*Manuscript Title:*], [ AETHER-64: High-Throughput Binary Devirtualization via Bit-Parallel Algebraic Pre-Reduction and SSA Bytecode Promotion],
   [*Author:*], [ Jeffrey Kim (Jeong Hoon Kim)],
   [*Affiliation:*], [ Department of Computer Science and Engineering, Hanyang University, Seoul, Republic of Korea],
   [*Corresponding Email:*], [ #text(fill: rgb("#2563eb"))[`jk9576@hanyang.ac.kr`]],

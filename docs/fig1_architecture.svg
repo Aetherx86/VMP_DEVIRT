@@ -67,7 +67,7 @@
   <circle cx="585" cy="42" r="10" fill="#16a34a" />
   <text x="585" y="46" text-anchor="middle" class="seq-badge">3</text>
   <text x="685" y="44" text-anchor="middle" class="txt-tool" fill="#16a34a">AETHER-64 Engine</text>
-  <text x="680" y="65" text-anchor="middle" class="txt-body">• VPC-Sensitive Emulation</text>
+  <text x="680" y="65" text-anchor="middle" class="txt-body">• Local Handler Slicing</text>
   <text x="680" y="83" text-anchor="middle" class="txt-body">• Fast Moebius Transform (Z/2^64)</text>
   <text x="680" y="101" text-anchor="middle" class="txt-body">• Predicate-Guarded Domain</text>
   <text x="680" y="119" text-anchor="middle" class="txt-sub">93.91% SMT Bypassed in O(1)</text>

@@ -1,5 +1,6 @@
-\documentclass[journal,10pt,twocolumn]{IEEEtran}
+\documentclass[11pt,a4paper]{article}
 
+\usepackage[margin=2.2cm]{geometry}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{algorithmic}
 \usepackage{algorithm}
@@ -11,6 +12,10 @@
 \usepackage{url}
 \usepackage{microtype}
 \usepackage{cite}
+
+\providecommand{\llbracket}{[\![}
+\providecommand{\rrbracket}{]\!]}
+
 
 \lstset{
   basicstyle=\ttfamily\scriptsize,
@@ -26,25 +31,26 @@
 
 \begin{document}
 
-\title{AETHER-64: Trace-Free Semantics-Preserving Devirtualization and Algebraic Deobfuscation for 64-Bit Protected Binaries}
+\title{\textbf{AETHER-64: High-Throughput Binary Devirtualization via Bit-Parallel Algebraic Pre-Reduction and SSA Bytecode Promotion}}
 
-\author{Jeffrey~Kim%
-\thanks{Jeffrey Kim is with the Department of Computer Science and Engineering, Hanyang University, Seoul 04763, Republic of Korea (e-mail: jk9576@hanyang.ac.kr).}%
-\thanks{Independent Research --- No External Grant, Committee, or Group Funding.}%
+\author{
+  \textbf{Anonymous Author(s)} \\
+  \textit{Affiliation and contact details omitted for Double-Anonymous Peer Review}
 }
+
+\date{}
 
 \maketitle
 
 \begin{abstract}
-Virtualization-based obfuscation and Mixed Boolean-Arithmetic (MBA) represent the modern standard for software intellectual property concealment and malware defense evasion, transforming native machine instructions into pseudo-random bytecodes executed by an embedded interpreter. Existing deobfuscation paradigms remain fundamentally brittle: dynamic execution tracing achieves incomplete path coverage while triggering anti-analysis defenses; classical Dynamic Symbolic Execution (DSE) suffers from catastrophic path explosion and prohibitive SMT solver latency over modular bit-vector arithmetic; and virtual stack mechanics leave hundreds of dead operations that overwhelm industry decompilers. In this paper, we present AETHER-64, a fully automated, trace-free devirtualization and algebraic simplification framework engineered specifically for 64-bit protected binaries. AETHER-64 introduces three foundational innovations: (1) Virtual Program Counter (VPC)-Sensitive Constraint-Free Symbolic Emulation, which reconstructs complete Control-Flow Graphs (CFGs) without accumulating path constraints, eliminating path explosion; (2) a bit-parallel Algebraic Pre-Reduction (APR) filter grounded in Boolean conjunction lattice signatures and fast Moebius inversion over $\mathbb{Z}/2^{64}\mathbb{Z}$, resolving invariant dispatch conditions in $O(1)$ time; and (3) syntax-directed I/O-guided non-linear MBA synthesis coupled with LLVM Static Single Assignment (SSA) virtual stack elimination. We evaluate AETHER-64 on the Quarkslab Diffing Obfuscation Dataset (104 ground-truth functions across MiniLua, Zlib, and SQLite comprising 56,883 bytecode instructions), 1,000 synthetic Tigress virtual machines, commercial protections (VMProtect 3.4/3.5, Themida 3.1), and 7-layer non-linear MBA expressions. AETHER-64 achieves 100\% CFG recovery, resolves 93.91\% of branch queries via APR filtering with an empirical 2,072.8$\times$ speedup over raw SMT resolution, eliminates 91.8\% of instruction bloat, and reconstructs clean, human-verifiable C pseudocode with mathematical bisimulation guarantees.
+Virtualization-based obfuscation and Mixed Boolean-Arithmetic (MBA) represent the modern standard for software intellectual property concealment and malware defense evasion, transforming native machine instructions into pseudo-random bytecodes executed by an embedded interpreter. Existing deobfuscation paradigms remain fundamentally brittle: dynamic execution tracing achieves incomplete path coverage while triggering anti-analysis defenses; classical Dynamic Symbolic Execution (DSE) suffers from catastrophic path explosion and prohibitive SMT solver latency over modular bit-vector arithmetic; and virtual stack mechanics leave hundreds of dead operations that overwhelm industry decompilers. In this paper, we present AETHER-64, a fully automated, static bytecode-driven devirtualization and algebraic simplification framework engineered specifically for 64-bit protected binaries. AETHER-64 introduces three foundational innovations: (1) Local-Context Handler Symbolic Slicing, which reconstructs complete Control-Flow Graphs (CFGs) through isolated basic block emulation without accumulating global path constraints; (2) a bit-parallel Algebraic Pre-Reduction (APR) filter grounded in Boolean conjunction lattice signatures and fast Moebius inversion over $\mathbb{Z}/2^{64}\mathbb{Z}$, resolving invariant dispatch conditions in $O(1)$ time; and (3) syntax-directed I/O-guided non-linear MBA synthesis coupled with LLVM Static Single Assignment (SSA) virtual stack elimination. We evaluate AETHER-64 on the Quarkslab Diffing Obfuscation Dataset (104 ground-truth functions across MiniLua, Zlib, and SQLite comprising 56,883 bytecode instructions), 1,000 synthetic Tigress virtual machines, commercial protections (VMProtect 3.4/3.5, Themida 3.1), and 7-layer non-linear MBA expressions. AETHER-64 achieves 100\% CFG recovery, resolves 93.91\% of branch queries via APR filtering with an empirical 2,072.8$\times$ speedup over raw SMT resolution, eliminates 91.8\% of instruction bloat, and reconstructs clean, human-verifiable C pseudocode with mathematical bisimulation guarantees.
 \end{abstract}
 
-\begin{IEEEkeywords}
-Binary Devirtualization, Reverse Engineering, Mixed Boolean-Arithmetic, Symbolic Execution, LLVM IR, Control-Flow Reconstruction, Software Security.
-\end{IEEEkeywords}
+\vspace{0.3cm}
+\noindent\textbf{Keywords:} Binary Devirtualization, Reverse Engineering, Mixed Boolean-Arithmetic, Algebraic Pre-Reduction, Fast Moebius Inversion, LLVM SSA Promotion, Control-Flow Reconstruction.
 
 \section{Introduction}
-\IEEEPARstart{S}{oftware} obfuscation has become an indispensable technology for protecting proprietary algorithmic assets against intellectual property theft, reverse engineering, and unlicensed software tampering \cite{collberg2002}. Simultaneously, identical obfuscation mechanisms are aggressively deployed by state-sponsored cyber adversaries and evasion-resilient malware authors to thwart static binary analysis, signature generation, and endpoint automated detection systems \cite{christodorescu2005}. Among modern software hardening paradigms, \textit{virtualization-based obfuscation} represents the state of the art \cite{x64unpack, rolles2009, yadegari2015, coogan2011}. Protectors such as VMProtect 3.x \cite{x64unpack, vmprotect}, Themida / Code Virtualizer \cite{themida}, and academic tools like Tigress \cite{tigress} transform native x86-64 machine instructions into randomized, proprietary bytecode sequences interpreted at runtime by an embedded virtual machine (VM).
+Software obfuscation has become an indispensable technology for protecting proprietary algorithmic assets against intellectual property theft, reverse engineering, and unlicensed software tampering \cite{collberg2002}. Simultaneously, identical obfuscation mechanisms are aggressively deployed by state-sponsored cyber adversaries and evasion-resilient malware authors to thwart static binary analysis, signature generation, and endpoint automated detection systems \cite{christodorescu2005}. Among modern software hardening paradigms, \textit{virtualization-based obfuscation} represents the state of the art \cite{x64unpack, rolles2009, yadegari2015, coogan2011}. Protectors such as VMProtect 3.x \cite{x64unpack, vmprotect}, Themida / Code Virtualizer \cite{themida}, and academic tools like Tigress \cite{tigress} transform native x86-64 machine instructions into randomized, proprietary bytecode sequences interpreted at runtime by an embedded virtual machine (VM).
 
 The security guarantee of binary virtualization rests on decoupling the physical instruction pointer (\texttt{RIP}) from the logical control flow of the program. An analyst or static disassembler inspecting the protected binary observes only a sprawling, labyrinthine interpreter execution loop characterized by indirect dispatcher routines, bytecode fetch-decode-execute mechanics, and deeply obfuscated handler transitions.
 
@@ -61,7 +67,7 @@ Despite more than fifteen years of active research into binary analysis, automat
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=0.95\textwidth]{fig1_architecture.pdf}
+\includegraphics[width=0.92\textwidth]{fig1_architecture.pdf}
 \caption{AETHER-64 Six-Stage Architecture: End-to-end pipelined toolchain transforming 64-bit virtualized PE/ELF binaries into clean, verifiable C pseudocode.}
 \label{fig_pipeline}
 \end{figure*}
@@ -75,7 +81,7 @@ Under classical DSE (angr or Triton), the symbolic engine attempts to symbolize 
 
 AETHER-64 resolves this challenge through three core insights:
 \begin{enumerate}
-    \item \textbf{Constraint-Free VPC Emulation:} Because the virtual interpreter is deterministic, branching at the virtual machine level is governed entirely by the Virtual Program Counter ($\text{VPC}$). By symbolically executing handlers locally without accumulating global path constraints $\Phi$, CFG recovery scales linearly with bytecode size.
+    \item \textbf{Local Handler Slicing:} Because the virtual interpreter is deterministic, branching at the virtual machine level is governed entirely by the bytecode program counter ($\text{VPC}$). By symbolically executing handlers within local basic block boundaries without accumulating global path formulas $\Phi$, CFG recovery scales linearly with bytecode size.
     \item \textbf{Algebraic Invariance Filtering:} The opaque predicate above belongs to the Boolean conjunction lattice over $\mathbb{Z}/2^{64}\mathbb{Z}$. Its truth-table signature can be evaluated across $\{0, 1\}^2$ and inverted via the Fast Moebius Transform in $\mathcal{O}(k \cdot 2^k)$ bit operations. AETHER-64 proves the condition is constant in \textbf{0.8 microseconds}, bypassing the SMT solver entirely.
     \item \textbf{Dominance-Based Stack Elimination:} By lifting the virtual stack pointer ($\text{VSP}$) to LLVM IR \texttt{alloca} memory locations and executing dominance-frontier SSA promotion (\texttt{-mem2reg}), all intermediate virtual stack operations collapse into pure SSA register temporaries, recovering the original one-line assignment.
 \end{enumerate}
@@ -83,7 +89,7 @@ AETHER-64 resolves this challenge through three core insights:
 \subsection{Summary of Contributions}
 The primary contributions of this paper are:
 \begin{itemize}
-    \item \textbf{VPC-Sensitive Constraint-Free Symbolic Execution:} We formalize a dual-coordinate execution model $\langle \text{PC}_{\text{host}}, \text{VPC} \rangle$ that exhaustively explores virtual control-flow graphs without path-constraint accumulation, guaranteeing complete coverage in linear time.
+    \item \textbf{Local-Context Handler Symbolic Slicing:} We formalize a dual-coordinate execution model $\langle \text{PC}_{\text{host}}, \text{VPC} \rangle$ that exhaustively explores virtual control-flow graphs through isolated handler evaluation without path-constraint accumulation, guaranteeing complete coverage in linear time.
     \item \textbf{Bit-Parallel Algebraic Pre-Reduction (APR) Filter:} We design and implement an $O(1)$ algebraic filter over $\mathbb{Z}/2^{64}\mathbb{Z}$ using Fast Moebius Inversion. The APR filter resolves $>90\%$ of dispatcher jump conditions without querying the SMT solver, delivering an empirical $2,072.8\times$ speedup.
     \item \textbf{Syntax-Directed Non-Linear MBA Synthesizer:} We engineer an MCMC-driven program synthesizer guided by I/O sampling fingerprints, capable of reducing high-degree (up to 7-layer) non-linear MBA polynomials into canonical operations with automated Z3 equivalence proofs.
     \item \textbf{LLVM IR Lifting and Virtual Stack Elimination:} We formalize the mapping of virtual interpreter mechanics into LLVM 18 IR and leverage SSA dominance promotion to eliminate 91.8\% of instruction bloat, outputting clean, decompiler-ready C pseudocode.
@@ -162,7 +168,7 @@ AETHER-64 incorporates a hybrid emulation sandbox inspired by x64Unpack \cite{x6
 Once the binary is unpacked, the Capstone disassembly engine \cite{capstone} decodes native instructions within the virtual interpreter loop. AETHER-64 traverses the physical instruction stream starting from the entry point, identifies the virtual machine context structure ($\text{VREG}$), extracts the base address of the encrypted bytecode buffer $\mathcal{B}$, and locates the dispatch table $\mathcal{T}$ or direct handler jump stubs.
 
 \begin{algorithm}[!t]
-\caption{VPC-Sensitive Constraint-Free Symbolic Handler Exploration}
+\caption{Local-Context Handler Symbolic Slicing}
 \label{alg_vpc}
 \begin{algorithmic}[1]
 \REQUIRE Bytecode $\mathcal{B}$, Initial state $\sigma_0$, Entry $\text{VPC}_0$, Handlers $\mathcal{H}$
@@ -198,11 +204,11 @@ Once the binary is unpacked, the Capstone disassembly engine \cite{capstone} dec
         \ENDIF
     \ENDWHILE
 \ENDWHILE
-\RETURN $\mathcal{G}$
+\STATE \textbf{return} $\mathcal{G}$
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Stage 3: VPC-Sensitive Constraint-Free Symbolic Execution}
+\subsection{Stage 3: Local-Context Handler Symbolic Slicing}
 Classical symbolic execution fails on virtualized binaries because it accumulates path constraints $\Phi$ across all native branches within the interpreter loop. For every bytecode decoded, the CPU executes 10 to 50 native conditional branches checking opcode ranges, alignment, and flags. Accumulating these interpreter-internal constraints produces path constraint formulas containing thousands of clauses, quickly overwhelming SMT solvers \cite{king1976, banescu2016}.
 
 AETHER-64 decouples host-level interpreter mechanics from logical program flow by formalizing a dual-coordinate execution context:
@@ -211,7 +217,7 @@ AETHER-64 decouples host-level interpreter mechanics from logical program flow b
 \end{equation}
 where $\text{PC}_{\text{host}}$ tracks physical instruction execution within a single handler, while $\text{VPC}$ tracks logical bytecode execution.
 
-\textbf{Constraint-Free Exploration Principle:} As formalized in Algorithm~\ref{alg_vpc}, symbolic execution is confined strictly to the boundary of an individual handler $h_i$. Within $h_i$, native instructions update the symbolic register/memory mapping $\sigma_{\text{sym}}$ using exact x86-64 operational semantics. When the handler updates $\text{VPC}$:
+\textbf{Isolated Handler Slicing Principle:} As formalized in Algorithm~\ref{alg_vpc}, symbolic execution is confined strictly to the boundary of an individual handler $h_i$. Within $h_i$, native instructions update the symbolic register/memory mapping $\sigma_{\text{sym}}$ using exact x86-64 operational semantics. When the handler updates $\text{VPC}$:
 \begin{enumerate}
     \item If $\text{VPC}$ resolves to a concrete address $\text{VPC}_{\text{next}}$, execution transitions to $\text{VPC}_{\text{next}}$ without recording any path constraint.
     \item If $\text{VPC}$ depends on a symbolic branch condition $c$, the engine extracts $c$ and passes it to the Algebraic Pre-Reduction (APR) filter.
@@ -234,20 +240,20 @@ To eliminate the SMT solver bottleneck during branch analysis, AETHER-64 introdu
     \STATE $v \leftarrow \text{BitVectorFromIndex}(i, k)$
     \STATE $S_f[i] \leftarrow \text{EvaluateBitwise}(f, v) \pmod{2^w}$
 \ENDFOR
-\FOR{$i = 0$ \textbf{to} $k - 1$} \COMMENT{Fast Moebius butterfly}
+\FOR{$i = 0$ \textbf{to} $k - 1$}
     \FOR{$j = 0$ \textbf{to} $N - 1$}
         \IF{$(j \land (1 \ll i)) \neq 0$}
             \STATE $S_f[j] \leftarrow (S_f[j] - S_f[j \oplus (1 \ll i)]) \pmod{2^w}$
         \ENDIF
     \ENDFOR
 \ENDFOR
-\FOR{$j = 1$ \textbf{to} $N - 1$} \COMMENT{Check non-constant coefficients}
+\FOR{$j = 1$ \textbf{to} $N - 1$}
     \IF{$S_f[j] \neq 0$}
-        \RETURN $(\textbf{false}, 0)$
+        \STATE \textbf{return} $(\textbf{false}, 0)$
     \ENDIF
 \ENDFOR
 \STATE $\text{val} \leftarrow (S_f[0] \neq 0) ? 1 : 0$
-\RETURN $(\textbf{true}, \text{val})$
+\STATE \textbf{return} $(\textbf{true}, \text{val})$
 \end{algorithmic}
 \end{algorithm}
 
@@ -267,7 +273,7 @@ Algorithm~\ref{alg_apr} implements this inversion using a Fast Walsh-Hadamard/Mo
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=0.95\textwidth]{fig2_benchmark_charts.pdf}
+\includegraphics[width=0.92\textwidth]{fig2_benchmark_charts.pdf}
 \caption{Empirical Performance Benchmarks. Left: Log-scale deobfuscation runtime comparing AETHER-64 against classical DSE. Right: SMT solver query bypass percentage achieved by the APR filter.}
 \label{fig_benchmarks}
 \end{figure*}
@@ -294,11 +300,11 @@ When non-linear MBA expressions appear (e.g., $x \cdot (y \lor z) + 3(x \land y)
     \ENDIF
     \IF{$O_{\text{cand}} == O_{\text{target}}$}
         \IF{$\text{Z3\_ProveEquivalence}(T_{\text{obf}}, T')$}
-            \RETURN $T'$
+            \STATE \textbf{return} $T'$
         \ENDIF
     \ENDIF
 \ENDFOR
-\RETURN $T_{\text{obf}}$
+\STATE \textbf{return} $T_{\text{obf}}$
 \end{algorithmic}
 \end{algorithm}
 
@@ -338,7 +344,7 @@ In stack-based virtual interpreters, every elementary native operation requires 
     \ENDFOR
 \ENDFOR
 \STATE $\text{RunLLVMPasses}(\mathcal{M}, [\text{``-mem2reg''}, \text{``-sroa''}, \text{``-simplifycfg''}, \text{``-dce''}])$
-\RETURN $\mathcal{M}$
+\STATE \textbf{return} $\mathcal{M}$
 \end{algorithmic}
 \end{algorithm}
 
@@ -355,7 +361,7 @@ The ordering of AETHER-64's toolchain stages is mathematically and architectural
 \begin{enumerate}
     \item \textbf{x64Unpack at Stage 1:} Essential because static disassemblers cannot parse binaries protected by dynamic runtime memory encryption, FLS callbacks, and inline syscall hooks \cite{x64unpack}.
     \item \textbf{Capstone at Stage 2:} Provides lightweight, zero-overhead machine instruction decoding without requiring heavy virtual machine instrumentation.
-    \item \textbf{VPC-Sensitive Symbolic Emulation at Stage 3:} Avoids global path constraints $\Phi$, enabling linear-time CFG exploration.
+    \item \textbf{Local Handler Slicing at Stage 3:} Avoids global path constraints $\Phi$, enabling linear-time CFG exploration.
     \item \textbf{APR Filter at Stage 4:} Resolves $>90\%$ of branch predicates in $O(1)$ time, eliminating the SMT bottleneck that causes classical DSE to stall.
     \item \textbf{Z3 and MCMC at Stage 5:} Selectively engaged only for high-degree non-linear expressions that resist linear algebraic inversion.
     \item \textbf{LLVM \texttt{-mem2reg} at Stage 6:} Dominance frontier analysis eliminates virtual stack bloat globally, achieving optimizations impossible via local peephole rewriting.
@@ -369,7 +375,7 @@ The ordering of AETHER-64's toolchain stages is mathematically and architectural
 \textbf{Theorem 1 (Weak Semantic Bisimulation).}
 \textit{Let $P$ be the original unobfuscated program, $M_{\text{vm}}(P)$ be the virtualized binary, and $P'$ be the devirtualized program recovered by AETHER-64. For all valid input vectors $I \in \mathcal{I}$ and initial CPU states $\sigma_0$, the execution of $P'$ weakly bisimulates the execution of $P$:}
 \begin{equation}
-\forall I \in \mathcal{I}: \quad \llbracket P' \rrbracket(I) = \llbracket P \rrbracket(I)
+\forall I \in \mathcal{I}: \quad [\![ P' ]\!](I) = [\![ P ]\!](I)
 \end{equation}
 
 \textit{Proof.} 
@@ -381,7 +387,7 @@ such that the projected program context $\pi_{\text{ctx}}(\sigma_m) = s_2$.
 
 AETHER-64 reconstructs $P'$ through three transformations:
 \begin{enumerate}
-    \item \textbf{Symbolic Handler Slicing:} Handler execution within Stage 3 models exact x86-64 semantics for registers and memory. Because emulation is deterministic and sound with respect to concrete CPU execution, the symbolic output expression $E_h$ satisfies $\sigma_m = \llbracket E_h \rrbracket(\sigma_0)$.
+    \item \textbf{Symbolic Handler Slicing:} Handler execution within Stage 3 models exact x86-64 semantics for registers and memory. Because emulation is deterministic and sound with respect to concrete CPU execution, the symbolic output expression $E_h$ satisfies $\sigma_m = [\![ E_h ]\!](\sigma_0)$.
     \item \textbf{Algebraic Reductions:} By Theorem~\ref{thm_moebius}, the APR filter preserves polynomial equality over $\mathbb{Z}/2^{64}\mathbb{Z}$. By construction of Stage 5, non-linear MCMC candidates are accepted only upon formal proof of equivalence ($\text{UNSAT}$) from Z3.
     \item \textbf{LLVM SSA Promotion:} As proven by Cytron et al. \cite{cytron1991}, SSA promotion via \texttt{-mem2reg} preserves program semantics under standard dominance frontier properties.
 \end{enumerate}
@@ -519,7 +525,7 @@ Consequently, AETHER-64 analyzed the entire 104-function dataset in \textbf{0.04
 \midrule
 (1) Full AETHER-64 & \textbf{100.0\%} & \textbf{3,465} & \textbf{0.04 s} & \textbf{91.8\%} \\
 (2) w/o APR Filter & 100.0\% & 56,883 & 82.9 s & 91.8\% \\
-(3) w/o VPC-Sym (DSE) & 26.9\% & 54,120 & $>$ 12 h & 14.2\% \\
+(3) w/o Local Slicing (DSE) & 26.9\% & 54,120 & $>$ 12 h & 14.2\% \\
 (4) w/o MCMC Synth & 94.2\% & 3,465 & 0.03 s & 64.1\% \\
 (5) w/o SSA Promotion & 100.0\% & 3,465 & 0.04 s & 18.4\% \\
 \bottomrule
@@ -553,7 +559,7 @@ To evaluate the contribution of each architectural component, we benchmarked fiv
 \begin{itemize}
     \item \textbf{Config 1 (Full AETHER-64):} Achieves 100\% recovery in 0.04~s with 91.8\% bloat reduction.
     \item \textbf{Config 2 (w/o APR Filter):} All 56,883 queries are sent to Z3. Runtime increases from 0.04~s to 82.9~s (a $2,072.5\times$ slowdown), demonstrating the necessity of algebraic pre-reduction.
-    \item \textbf{Config 3 (w/o VPC-Sensitivity - Classical DSE):} Path constraints accumulate across handler dispatches. Coverage collapses to 26.9\% due to path explosion.
+    \item \textbf{Config 3 (w/o Local Slicing - Classical DSE):} Path constraints accumulate across handler dispatches. Coverage collapses to 26.9\% due to path explosion.
     \item \textbf{Config 4 (w/o MCMC Synthesizer):} Fails to simplify non-linear MBA residues, reducing bloat elimination from 91.8\% to 64.1\%.
     \item \textbf{Config 5 (w/o SSA Virtual Stack Promotion):} Retains raw memory load/store operations, leaving 81.6\% of instructions in the output and degrading decompiler readability.
 \end{itemize}
@@ -561,7 +567,7 @@ To evaluate the contribution of each architectural component, we benchmarked fiv
 \subsection{Case Studies: Commercial VMProtect and Themida}
 We applied AETHER-64 to 28 commercial targets protected with VMProtect 3.4/3.5 and Themida 3.1:
 \begin{enumerate}
-    \item \textbf{VMProtect 3.5.1:} The Stage 1 hybrid sandbox trapped 14 direct \texttt{syscall} invocations and caught FLS memory decryption routines. The VPC symbolic engine mapped 89,450 bytecode instructions across 18.4 seconds. APR bypassed 92.1\% of opaque dispatch conditions, successfully reconstructing the complete dispatcher CFG and recovering the original AES encryption routine.
+    \item \textbf{VMProtect 3.5.1:} The Stage 1 hybrid sandbox trapped 14 direct \texttt{syscall} invocations and caught FLS memory decryption routines. The local symbolic engine mapped 89,450 bytecode instructions across 18.4 seconds. APR bypassed 92.1\% of opaque dispatch conditions, successfully reconstructing the complete dispatcher CFG and recovering the original AES encryption routine.
     \item \textbf{Themida 3.1.2:} Themida wraps API calls within polymorphic redirection stubs. AETHER-64 resolved all indirect API jumps in 42.1 seconds, achieving 100\% CFG recovery with zero manual intervention.
 \end{enumerate}
 
@@ -577,7 +583,7 @@ We applied AETHER-64 to 28 commercial targets protected with VMProtect 3.4/3.5 a
 \section{Related Work}
 \textbf{Binary Virtualization and Packers:} Rolles \cite{rolles2009} presented foundational manual unpacking techniques for virtualized binaries. Sharif et al. \cite{sharif2009} automated instruction set extraction. Choi et al. \cite{x64unpack} engineered x64Unpack, introducing hybrid emulation to neutralize inline syscalls and FLS heap evasion in VMProtect 3.4. AETHER-64 builds upon these insights to automate end-to-end devirtualization.
 
-\textbf{Dynamic Symbolic Execution and Path Explosion:} King \cite{king1976} and Cadar et al. \cite{klee} established symbolic execution principles. Modern platforms such as angr \cite{angr}, Triton \cite{triton}, and S2E \cite{angr} scale symbolic execution across complex systems code. However, path constraint accumulation remains a crippling limitation in virtualized interpreters. AETHER-64 eliminates this barrier via constraint-free VPC sensitivity.
+\textbf{Dynamic Symbolic Execution and Path Explosion:} King \cite{king1976} and Cadar et al. \cite{klee} established symbolic execution principles. Modern platforms such as angr \cite{angr}, Triton \cite{triton}, and S2E \cite{angr} scale symbolic execution across complex systems code. However, path constraint accumulation remains a crippling limitation in virtualized interpreters. AETHER-64 eliminates this barrier via isolated local handler evaluation.
 
 \textbf{Mixed Boolean-Arithmetic Simplification:} Zhou et al. \cite{zhou2007} introduced MBA transformations. Eyrolles \cite{eyrolles2017} developed SSPAM, using term rewriting and SMT solving. Blazytko et al. \cite{syntia} introduced Syntia, employing MCMC program synthesis. Liu et al. \cite{mbasolver} developed MBA-Solver. AETHER-64 advances the state of the art by uniting Fast Moebius inversion for linear MBAs with signature-guided MCMC synthesis for non-linear terms.
 
@@ -586,15 +592,12 @@ We applied AETHER-64 to 28 commercial targets protected with VMProtect 3.4/3.5 a
 \section{Conclusion}
 Virtualization-based obfuscation has long presented an asymmetric barrier to automated binary analysis, forcing security analysts to navigate between incomplete dynamic traces and path-exploding symbolic execution.
 
-In this paper, we introduced \textbf{AETHER-64}, a fully automated, trace-free devirtualization and algebraic simplification framework for 64-bit protected binaries. By combining Virtual Program Counter (VPC)-Sensitive Constraint-Free Symbolic Emulation with a bit-parallel Algebraic Pre-Reduction (APR) filter, AETHER-64 eliminates path constraints and resolves 93.91\% of branch queries in $O(1)$ time, delivering an empirical $2,072.8\times$ speedup over raw SMT resolution. Validated across the Quarkslab Diffing Obfuscation Dataset (104 ground-truth functions, 56,883 bytecodes), 1,000 synthetic Tigress VMs, and commercial targets (VMProtect 3.4/3.5, Themida 3.1), AETHER-64 achieves 100\% CFG recovery, reduces virtual interpreter instruction bloat by 91.8\%, and synthesizes 7-layer non-linear MBAs in 40.56~ms. AETHER-64 provides the first practical, mathematically sound bridge from heavily virtualized 64-bit machine code to clean, human-verifiable C pseudocode.
+In this paper, we introduced \textbf{AETHER-64}, a fully automated, static bytecode-driven devirtualization and algebraic simplification framework for 64-bit protected binaries. By combining Local-Context Handler Symbolic Slicing with a bit-parallel Algebraic Pre-Reduction (APR) filter, AETHER-64 eliminates path constraints and resolves 93.91\% of branch queries in $O(1)$ time, delivering an empirical $2,072.8\times$ speedup over raw SMT resolution. Validated across the Quarkslab Diffing Obfuscation Dataset (104 ground-truth functions, 56,883 bytecodes), 1,000 synthetic Tigress VMs, and commercial targets (VMProtect 3.4/3.5, Themida 3.1), AETHER-64 achieves 100\% CFG recovery, reduces virtual interpreter instruction bloat by 91.8\%, and synthesizes 7-layer non-linear MBAs in 40.56~ms. AETHER-64 provides the first practical, mathematically sound bridge from heavily virtualized 64-bit machine code to clean, human-verifiable C pseudocode.
 
 \section*{Data and Software Availability}
-The complete AETHER-64 framework source code, benchmark suites, verification harnesses, and evaluation logs are openly available for research reproducibility at:
-\begin{center}
-\url{https://github.com/omakasekim/VMP_DEVIRT}
-\end{center}
+\textit{To comply with double-anonymous peer review requirements, the permanent public repository link is omitted during review. All source code, verification test harnesses, and evaluation logs have been uploaded to an anonymized repository accessible to peer reviewers: \url{https://anonymous.4open.science/r/AETHER-64-DEVIRT}}
 
-\bibliographystyle{IEEEtran}
+\bibliographystyle{plain}
 \begin{thebibliography}{10}
 
 \bibitem{x64unpack}
