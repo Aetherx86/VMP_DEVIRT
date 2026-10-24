@@ -138,3 +138,5 @@ typst compile docs/aether64_paper.typ docs/aether64_paper.pdf
 - **Syntia:** Blazytko et al., *"Syntia: Synthesizing the Semantics of Obfuscated Code"*, USENIX Security 2017.
 - **ProMBA:** Saumier et al., *"Simplifying Mixed Boolean-Arithmetic Obfuscation by Program Synthesis and Term Rewriting"*, IEEE TDSC / ACM CCS.
 - **AETHER-64:** Kim, Jeffrey, *"AETHER-64: Trace-Free Semantics-Preserving Devirtualization and Algebraic Deobfuscation for 64-Bit Protected Binaries"*, Independent Academic Research, 2026.
+
+## Paper/Article related can be accessed [here](https://www.researchgate.net/publication/416711614_AETHER-64_Trace-Free_Semantics-Preserving_Devirtualization_and_Al-_gebraic_Deobfuscation_for_64-Bit_Protected_Binaries)
