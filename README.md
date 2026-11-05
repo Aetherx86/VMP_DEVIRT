@@ -4,7 +4,37 @@ An integrated research suite for the analysis, dynamic unpacking, symbolic seman
 
 ---
 
-##  Theoretical & Methodological Foundations
+
+---
+
+## Devirtualization Framework Comparison
+
+| Analysis Dimension / Capability | VMP_DEVIRT | Standard IDA / Ghidra | NoVmp / ScyllaHide | D810 Deobfuscator |
+| :--- | :---: | :---: | :---: | :---: |
+| **VMProtect 3.x Devirtualization** | Complete Automated | Manual Scripting | Partial Hooking | Rule-based only |
+| **Themida 3.x CISC/RISC VM Lifting** | Automated Handler Lift | Unsupported | Memory Dump only | Unsupported |
+| **SMT Symbolic Execution (Z3 v4.12)** | Integrated Semantic Slice | Plugin required | NO | Partial |
+| **Opaque Predicate Elimination** | Formal Equivalence Proof | Heuristic only | NO | Pattern AST match |
+| **Pure LLVM IR Emission** | YES (Clean SSA IR) | NO (Decompiler C only) | NO | Microcode only |
+| **Re-compilation to Clean Binary** | YES (`driver_clean.bin`) | NO | NO | NO |
+| **Target Architecture** | x86_64 Native | Multi-arch | x86 / x86_64 | Architecture agnostic |
+
+
+---
+
+## Devirtualization Framework Comparison
+
+| Analysis Dimension / Capability | VMP_DEVIRT | Standard IDA / Ghidra | NoVmp / ScyllaHide | D810 Deobfuscator |
+| :--- | :---: | :---: | :---: | :---: |
+| **VMProtect 3.x Devirtualization** | Complete Automated | Manual Scripting | Partial Hooking | Rule-based only |
+| **Themida 3.x CISC/RISC VM Lifting** | Automated Handler Lift | Unsupported | Memory Dump only | Unsupported |
+| **SMT Symbolic Execution (Z3 v4.12)** | Integrated Semantic Slice | Plugin required | NO | Partial |
+| **Opaque Predicate Elimination** | Formal Equivalence Proof | Heuristic only | NO | Pattern AST match |
+| **Pure LLVM IR Emission** | YES (Clean SSA IR) | NO (Decompiler C only) | NO | Microcode only |
+| **Re-compilation to Clean Binary** | YES (`driver_clean.bin`) | NO | NO | NO |
+| **Target Architecture** | x86_64 Native | Multi-arch | x86 / x86_64 | Architecture agnostic |
+
+## Theoretical & Methodological Foundations
 
 This framework synthesizes foundational breakthroughs across state-of-the-art reverse engineering and binary analysis research:
 
