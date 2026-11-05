@@ -4,7 +4,7 @@ An integrated research suite for the analysis, dynamic unpacking, symbolic seman
 
 ---
 
-## 🌟 Theoretical & Methodological Foundations
+##  Theoretical & Methodological Foundations
 
 This framework synthesizes foundational breakthroughs across state-of-the-art reverse engineering and binary analysis research:
 
@@ -41,7 +41,7 @@ This framework synthesizes foundational breakthroughs across state-of-the-art re
 
 ---
 
-## 📂 Repository Directory Structure
+##  Repository Directory Structure
 
 ```
 VMP_DEVIRT/
@@ -73,7 +73,7 @@ VMP_DEVIRT/
 
 ---
 
-## 🛠️ Submodules & Academic Toolchains
+## ️ Submodules & Academic Toolchains
 
 The repository links the following external open-source engines via Git submodules:
 
@@ -95,7 +95,7 @@ git submodule update --init --recursive
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### 1. Prerequisites
 - **Operating System:** Linux (Ubuntu 20.04/22.04 LTS recommended) or macOS
@@ -131,7 +131,7 @@ typst compile docs/aether64_paper.typ docs/aether64_paper.pdf
 
 ---
 
-## 📚 Publications & References
+##  Publications & References
 
 - **x64Unpack:** Choi et al., *"x64Unpack: Hybrid Emulation Unpacker for 64-bit Windows Environments and Detailed Analysis Results on VMProtect 3.4"*, IEEE Access, 2020.
 - **CIA:** *"Chosen Instruction Attack Against Commercial Code Virtualization Obfuscators"*, NDSS 2022.
