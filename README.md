@@ -96,6 +96,7 @@ VMP_DEVIRT/
 │   ├── evaluate_deobfuscation.py # SMT equivalence & VPC emulation vs DSE evaluation
 │   └── real_benchmark_results.json # Verified execution timings and reduction ratios
 ├── research/                # Mathematical prototypes and formal algebraic derivations
+├── rust/                    # Standalone tools: wasm-superopt (Wasm deobfuscator) and absint (static analyzer)
 ├── CIA.md                   # Chosen-Instruction Attack guide & Rolf Rolles VMP monograph
 ├── .gitmodules              # Academic open-source submodules registry
 └── .gitignore               # Build, binary, and OS artifact filter
@@ -122,6 +123,67 @@ To initialize and fetch all submodules:
 ```bash
 git submodule update --init --recursive
 ```
+
+---
+
+## Rust Tools
+
+The `rust/` workspace holds two standalone tools. They have no Python or Z3 dependency, and prebuilt binaries are attached to each [release](https://github.com/Aetherx86/VMP_DEVIRT/releases/latest).
+
+```bash
+cd rust
+cargo build --release
+./target/release/wasm-superopt obfuscated.wasm -o clean.wasm
+./target/release/absint module.wasm
+./target/release/absint --x86-64 --base 0x401000 function.bin
+```
+
+### wasm-superopt
+
+Applies the same algebraic approach as AETHER-64 to WebAssembly, in the form of a deobfuscator. Each function is lifted from stack code into a hash-consed SSA graph, simplified, and lowered back.
+
+| Technique | Example input | Output | Basis |
+| --- | --- | --- | --- |
+| Linear MBA | `(x ^ y) + 2 * (x & y)` | `x + y` | Signature over all-zeros and all-ones inputs, which decides linear MBA exactly |
+| Opaque predicate, parity | `(x * x + x) & 1 == 0` | always true | Arithmetic over GF(2) on the lowest bit |
+| Opaque predicate, modular | `7 * y * y - 1 == x * x` | always false | The low bits of a T-function depend only on the low bits of its inputs |
+| Opaque predicate, range | `(x & 7) > 7` | always false | Unsigned range analysis |
+| Shuffling | `local.set`, `local.get` through temporaries | direct use | Deferred writes, emitted as a parallel assignment |
+| Dead code | branches on constants, code after a `return` | removed | Constants tracked through locals and into blocks |
+
+Guarantees, whatever the input: everything outside the code section stays byte for byte, a function is replaced only if its encoding gets smaller, and the result is validated before it is returned. Trapping operations, memory access and calls are never removed or reordered.
+
+How that is checked: 1,500 random modules with traps, memory, globals, host calls and floats run on Wasmtime before and after, comparing the result or exact trap, each host call, all of memory, and the globals. In addition, 40,000 random expressions are compared against plain evaluation, 30,000 damaged modules must never cause a panic or invalid output, and 49 deliberately injected bugs were tried against the test suite. It caught 48, and the remaining one has no known input that exposes it.
+
+Limitations: it does not undo control-flow flattening or virtualization, and nonlinear MBA is only simplified where its linear parts allow. Functions with exceptions, tail calls, garbage collection or vector instructions are left exactly as they were. DWARF offsets are not updated, so debug info in a rewritten module goes stale.
+
+### absint
+
+Computes an over-approximation of every state a program can reach, using interval and nullness domains with widening and narrowing. A fault that cannot occur in the over-approximation cannot occur at all. A fault reported as possible may be a false alarm, since the intervals are non-relational: `i < n` proves nothing about `i` unless `n` has a known range.
+
+| Frontend | Proves the absence of | Assumes |
+| --- | --- | --- |
+| Text format | Out of bounds access, null dereference, division by zero, uninitialized reads, failed assertions | Nothing beyond the format's own meaning, which `ir::run` defines exactly |
+| Locksets, on the text format | Data races on globals | Globals are named directly, and thread start order is ignored, which can cause false alarms and not misses |
+| WebAssembly | Loads and stores past the declared minimum memory, division by zero | Vector, atomic and bulk accesses are not checked. Functions with exceptions or tail calls are listed as not analyzed |
+| x86-64 machine code | Writes through the stack pointer that could reach the return address | Calls return normally and follow the System V ABI, and unknown pointers miss the frame. Those are reported as unknown, and not as proved |
+
+```text
+fn fill() {
+  buf = alloc 16
+  i = 0
+head:
+  if i < 16 goto body else done
+body:
+  store buf[i] = i
+  i = i + 1
+  goto head
+done:
+  return
+}
+```
+
+Soundness is tested against the exact concrete semantics: random programs run on random inputs, every variable has to stay within its abstract value at every step, a fault must never occur where the analyzer proved it impossible, and a definite verdict must fault every time it is reached.
 
 ---
 

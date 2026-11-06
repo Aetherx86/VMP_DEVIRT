@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
   cmake-benchmarks:
     name: CMake C Benchmarks (${{ matrix.os }})

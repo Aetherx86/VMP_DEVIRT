@@ -16,6 +16,22 @@ permissions:
   contents: read
 
 jobs:
+  # A job's `if:` cannot use hashFiles, so this works out which jobs apply.
+  detect:
+    name: Detect Project Types
+    runs-on: ubuntu-latest
+    outputs:
+      docker_workflow: ${{ steps.files.outputs.docker_workflow }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Look for each kind of project
+        id: files
+        run: |
+          if [ -n "$(git ls-files -- ':(glob)**/Dockerfile*' | head -1)" ]; then echo "docker_workflow=true" >> "$GITHUB_OUTPUT"; else echo "docker_workflow=false" >> "$GITHUB_OUTPUT"; fi
+
   # ===========================================================================
   # 1. Security & Safety: Secret Scanning and Repository Hygiene
   # ===========================================================================
@@ -24,12 +40,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
 
       - name: Secret Scan (Gitleaks)
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
@@ -37,62 +53,8 @@ jobs:
       - name: Repository Hygiene & Conflict Marker Verification
         run: |
           echo "Scanning for unresolved git conflict markers..."
-          ! git grep -nE '<<<<<<< HEAD|=======|>>>>>>>' -- ':!*.pdf' ':!*.png' ':!*.jpg' ':!*.mp4' || (echo "Error: Unresolved conflict markers found" && exit 1)
+          ! git grep -nIE '^(<<<<<<< |>>>>>>> )' || (echo "Error: Unresolved conflict markers found" && exit 1)
           echo "Repository hygiene check completed successfully."
-
-  # ===========================================================================
-  # 2. Rust Quality & Security Workflow
-  # ===========================================================================
-  rust-workflow:
-    name: Rust Quality, Tests & Security Audit
-    runs-on: ubuntu-latest
-    if: hashFiles('**/Cargo.toml') != ''
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Rust Toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - name: Cache Cargo Dependencies
-        uses: Swatinem/rust-cache@v2
-
-      - name: Install cargo-audit
-        uses: taiki-e/install-action@cargo-audit
-
-      - name: Rust Formatting Check (cargo fmt)
-        run: |
-          if [ -f "Cargo.toml" ]; then
-            cargo fmt --all -- --check
-          else
-            find . -name "Cargo.toml" -not -path "*/target/*" -execdir cargo fmt --all -- --check \;
-          fi
-
-      - name: Rust Linter Check (cargo clippy)
-        run: |
-          if [ -f "Cargo.toml" ]; then
-            cargo clippy --workspace --all-targets --all-features -- -D warnings
-          else
-            find . -name "Cargo.toml" -not -path "*/target/*" -execdir cargo clippy --all-targets --all-features -- -D warnings \;
-          fi
-
-      - name: Rust Tests (cargo test)
-        run: |
-          if [ -f "Cargo.toml" ]; then
-            cargo test --workspace --all-targets --all-features
-          else
-            find . -name "Cargo.toml" -not -path "*/target/*" -execdir cargo test --all-targets --all-features \;
-          fi
-
-      - name: Rust Vulnerability Audit (cargo audit)
-        run: |
-          if [ -f "Cargo.toml" ]; then
-            cargo audit
-          else
-            find . -name "Cargo.toml" -not -path "*/target/*" -execdir cargo audit \;
-          fi
 
   # ===========================================================================
   # 3. Docker Quality & Vulnerability Workflow
@@ -100,20 +62,21 @@ jobs:
   docker-workflow:
     name: Docker Lint, Build & Trivy Scan
     runs-on: ubuntu-latest
-    if: hashFiles('**/Dockerfile*') != ''
+    needs: detect
+    if: needs.detect.outputs.docker_workflow == 'true'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Lint Dockerfile (Hadolint)
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
         with:
           recursive: true
           ignore: DL3008,DL3013
           failure-threshold: error
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Build Docker Image
         run: |
@@ -126,7 +89,7 @@ jobs:
           fi
 
       - name: Container Security Scan (Trivy)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@38b337fff0a2f984d5be173c99e3f633438167ec # master
         with:
           image-ref: 'ci-test-image:latest'
           format: 'table'

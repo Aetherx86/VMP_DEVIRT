@@ -62,3 +62,6 @@ docs/Archived/
 *.trace.*
 devirt.vmp.trace
 trace_vmp
+
+# Rust
+rust/target/
