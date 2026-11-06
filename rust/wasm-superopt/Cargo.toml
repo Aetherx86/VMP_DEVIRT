@@ -16,5 +16,5 @@ wasm-encoder = { version = "0.263", features = ["wasmparser"] }
 wasmparser = "0.263"
 
 [dev-dependencies]
-wasmtime = "48"
+wasmtime = "50"
 wat = "1"
