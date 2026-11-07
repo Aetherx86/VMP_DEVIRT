@@ -1,0 +1,14 @@
+[workspace]
+resolver = "3"
+members = ["wasm-superopt", "absint"]
+
+[workspace.package]
+version = "1.1.1"
+edition = "2024"
+license = "MIT"
+authors = ["Jeong Hoon Kim"]
+repository = "https://github.com/Aetherx86/VMP_DEVIRT"
+
+# The differential tests run many modules through a real engine, which is far too slow unoptimized.
+[profile.dev.package."*"]
+opt-level = 2

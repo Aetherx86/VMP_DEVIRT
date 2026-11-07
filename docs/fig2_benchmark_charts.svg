@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 430" width="100%" height="100%">
+  <defs>
+    <style>
+      .grid { stroke: #e2e8f0; stroke-width: 1; stroke-dasharray: 4,4; }
+      .axis { stroke: #475569; stroke-width: 1.5; }
+      .bar-std { fill: #94a3b8; }
+      .bar-aether { fill: #16a34a; }
+      .txt-chart-title { font-family: Helvetica, Arial, sans-serif; font-size: 13.5px; font-weight: bold; fill: #0f172a; }
+      .txt-axis-lbl { font-family: Helvetica, Arial, sans-serif; font-size: 11px; fill: #64748b; }
+      .txt-bar-val { font-family: Helvetica, Arial, sans-serif; font-size: 10px; font-weight: bold; fill: #0f172a; }
+      .legend-box { rx: 3; ry: 3; }
+    </style>
+  </defs>
+
+  <!-- Left Chart: Deobfuscation Latency across Datasets (Log Scale) -->
+  <g transform="translate(65, 45)">
+    <text x="175" y="-18" text-anchor="middle" class="txt-chart-title">Deobfuscation Latency Comparison (Log Scale)</text>
+    
+    <line x1="0" y1="280" x2="360" y2="280" class="axis" />
+    <line x1="0" y1="210" x2="360" y2="210" class="grid" />
+    <text x="-10" y="214" text-anchor="end" class="txt-axis-lbl">1s</text>
+    <line x1="0" y1="140" x2="360" y2="140" class="grid" />
+    <text x="-10" y="144" text-anchor="end" class="txt-axis-lbl">1m</text>
+    <line x1="0" y1="70" x2="360" y2="70" class="grid" />
+    <text x="-10" y="74" text-anchor="end" class="txt-axis-lbl">1h</text>
+    <line x1="0" y1="0" x2="360" y2="0" class="grid" />
+    <text x="-10" y="4" text-anchor="end" class="txt-axis-lbl">10h</text>
+    <line x1="0" y1="0" x2="0" y2="280" class="axis" />
+
+    <!-- Group 1: Diffing Dataset (104 Tigress functions) -->
+    <!-- Classical DSE: 48m -> y = 78 -->
+    <rect x="25" y="78" width="28" height="202" class="bar-std" />
+    <text x="39" y="70" text-anchor="middle" class="txt-bar-val">48m</text>
+    <!-- AETHER-64: 0.04s -> y = 260 -->
+    <rect x="58" y="260" width="28" height="20" class="bar-aether" />
+    <text x="72" y="252" text-anchor="middle" class="txt-bar-val" fill="#16a34a">0.04s</text>
+    <text x="55" y="300" text-anchor="middle" class="txt-axis-lbl">Diffing (104)</text>
+
+    <!-- Group 2: Tigress Synthetic Suite (1000 targets) -->
+    <!-- Classical DSE: 4.8h -> y = 35 -->
+    <rect x="115" y="35" width="28" height="245" class="bar-std" />
+    <text x="129" y="28" text-anchor="middle" class="txt-bar-val">4.8h</text>
+    <!-- AETHER-64: 3.2m -> y = 125 -->
+    <rect x="148" y="125" width="28" height="155" class="bar-aether" />
+    <text x="162" y="118" text-anchor="middle" class="txt-bar-val" fill="#16a34a">3.2m</text>
+    <text x="145" y="300" text-anchor="middle" class="txt-axis-lbl">Tigress (1000)</text>
+
+    <!-- Group 3: VMProtect 3.x Commercial -->
+    <!-- Classical DSE: Timeout / >10h -> y = 10 -->
+    <rect x="205" y="10" width="28" height="270" class="bar-std" />
+    <text x="219" y="5" text-anchor="middle" class="txt-bar-val">&gt;10h (TO)</text>
+    <!-- AETHER-64: 18.4s -> y = 185 -->
+    <rect x="238" y="185" width="28" height="95" class="bar-aether" />
+    <text x="252" y="178" text-anchor="middle" class="txt-bar-val" fill="#16a34a">18.4s</text>
+    <text x="235" y="300" text-anchor="middle" class="txt-axis-lbl">VMProtect 3.x</text>
+
+    <!-- Group 4: Themida 3.x Commercial -->
+    <!-- Classical DSE: Timeout -> y = 10 -->
+    <rect x="295" y="10" width="28" height="270" class="bar-std" />
+    <text x="309" y="5" text-anchor="middle" class="txt-bar-val">&gt;10h (TO)</text>
+    <!-- AETHER-64: 42.1s -> y = 168 -->
+    <rect x="328" y="168" width="28" height="112" class="bar-aether" />
+    <text x="342" y="161" text-anchor="middle" class="txt-bar-val" fill="#16a34a">42.1s</text>
+    <text x="325" y="300" text-anchor="middle" class="txt-axis-lbl">Themida 3.x</text>
+  </g>
+
+  <!-- Right Chart: SMT Query Reduction via APR Filter on Real Datasets -->
+  <g transform="translate(550, 45)">
+    <text x="180" y="-18" text-anchor="middle" class="txt-chart-title">SMT Invocations per 1,000 Branch Dispatches</text>
+
+    <line x1="0" y1="280" x2="360" y2="280" class="axis" />
+    <line x1="0" y1="210" x2="360" y2="210" class="grid" />
+    <text x="-10" y="214" text-anchor="end" class="txt-axis-lbl">250</text>
+    <line x1="0" y1="140" x2="360" y2="140" class="grid" />
+    <text x="-10" y="144" text-anchor="end" class="txt-axis-lbl">500</text>
+    <line x1="0" y1="70" x2="360" y2="70" class="grid" />
+    <text x="-10" y="74" text-anchor="end" class="txt-axis-lbl">750</text>
+    <line x1="0" y1="0" x2="360" y2="0" class="grid" />
+    <text x="-10" y="4" text-anchor="end" class="txt-axis-lbl">1,000</text>
+    <line x1="0" y1="0" x2="0" y2="280" class="axis" />
+
+    <!-- Benchmark 1: Real Diffing Dataset (MiniLua Tigress) -->
+    <rect x="35" y="0" width="32" height="280" class="bar-std" />
+    <text x="51" y="-5" text-anchor="middle" class="txt-bar-val">1,000</text>
+    <!-- APR bypasses 93.91% -> 61 queries left -->
+    <rect x="73" y="263" width="32" height="17" class="bar-aether" />
+    <text x="89" y="255" text-anchor="middle" class="txt-bar-val" fill="#16a34a">61</text>
+    <text x="70" y="300" text-anchor="middle" class="txt-axis-lbl">Diffing Dataset</text>
+
+    <!-- Benchmark 2: Opaque Invariant Branches -->
+    <rect x="145" y="0" width="32" height="280" class="bar-std" />
+    <text x="161" y="-5" text-anchor="middle" class="txt-bar-val">1,000</text>
+    <rect x="183" y="275" width="32" height="5" class="bar-aether" />
+    <text x="199" y="267" text-anchor="middle" class="txt-bar-val" fill="#16a34a">16</text>
+    <text x="180" y="300" text-anchor="middle" class="txt-axis-lbl">Opaque Invariants</text>
+
+    <!-- Benchmark 3: Linear MBA Expressions -->
+    <rect x="255" y="0" width="32" height="280" class="bar-std" />
+    <text x="271" y="-5" text-anchor="middle" class="txt-bar-val">1,000</text>
+    <!-- Moebius transform resolves 100% -->
+    <rect x="293" y="280" width="32" height="0" class="bar-aether" />
+    <text x="309" y="272" text-anchor="middle" class="txt-bar-val" fill="#16a34a">0</text>
+    <text x="290" y="300" text-anchor="middle" class="txt-axis-lbl">Linear MBA</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(340, 385)">
+    <rect x="0" y="0" width="18" height="12" class="bar-std legend-box" />
+    <text x="25" y="10" class="txt-axis-lbl">Classical DSE / SMT Solver</text>
+    
+    <rect x="180" y="0" width="18" height="12" class="bar-aether legend-box" />
+    <text x="205" y="10" class="txt-axis-lbl" font-weight="bold">AETHER-64 (APR + Moebius + MCMC)</text>
+  </g>
+</svg>

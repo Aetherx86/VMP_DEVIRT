@@ -1,0 +1,15 @@
+[package]
+name = "absint"
+description = "An abstract interpretation static analyzer: proves memory safety facts about programs without running them"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[dependencies]
+iced-x86 = { version = "1.22", default-features = false, features = ["std", "decoder", "instr_info", "nasm"] }
+wasmparser = "0.263"
+
+[dev-dependencies]
+wat = "1"

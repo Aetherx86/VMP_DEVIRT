@@ -1,0 +1,98 @@
+# Copyright (c) 2026 Jeong Hoon Kim. All rights reserved.
+name: CI Safety & Quality Pipeline
+
+on:
+  push:
+    tags:
+      - "v*.0.0"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # A job's `if:` cannot use hashFiles, so this works out which jobs apply.
+  detect:
+    name: Detect Project Types
+    runs-on: ubuntu-latest
+    outputs:
+      docker_workflow: ${{ steps.files.outputs.docker_workflow }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Look for each kind of project
+        id: files
+        run: |
+          if [ -n "$(git ls-files -- ':(glob)**/Dockerfile*' | head -1)" ]; then echo "docker_workflow=true" >> "$GITHUB_OUTPUT"; else echo "docker_workflow=false" >> "$GITHUB_OUTPUT"; fi
+
+  # ===========================================================================
+  # 1. Security & Safety: Secret Scanning and Repository Hygiene
+  # ===========================================================================
+  security-audit:
+    name: Security & Secret Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Secret Scan (Gitleaks)
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7 # v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Repository Hygiene & Conflict Marker Verification
+        run: |
+          echo "Scanning for unresolved git conflict markers..."
+          ! git grep -nIE '^(<<<<<<< |>>>>>>> )' || (echo "Error: Unresolved conflict markers found" && exit 1)
+          echo "Repository hygiene check completed successfully."
+
+  # ===========================================================================
+  # 3. Docker Quality & Vulnerability Workflow
+  # ===========================================================================
+  docker-workflow:
+    name: Docker Lint, Build & Trivy Scan
+    runs-on: ubuntu-latest
+    needs: detect
+    if: needs.detect.outputs.docker_workflow == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Lint Dockerfile (Hadolint)
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
+        with:
+          recursive: true
+          ignore: DL3008,DL3013
+          failure-threshold: error
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build Docker Image
+        run: |
+          if [ -f "Dockerfile" ]; then
+            docker build -t ci-test-image:latest -f Dockerfile .
+          else
+            FIRST_DF=$(find . -name "Dockerfile*" -not -path "*/node_modules/*" | head -n 1)
+            CONTEXT_DIR=$(dirname "$FIRST_DF")
+            docker build -t ci-test-image:latest -f "$FIRST_DF" "$CONTEXT_DIR"
+          fi
+
+      - name: Container Security Scan (Trivy)
+        uses: aquasecurity/trivy-action@38b337fff0a2f984d5be173c99e3f633438167ec # master
+        with:
+          image-ref: 'ci-test-image:latest'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
